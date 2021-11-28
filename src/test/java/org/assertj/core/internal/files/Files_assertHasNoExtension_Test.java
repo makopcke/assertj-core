@@ -12,7 +12,6 @@
  */
 package org.assertj.core.internal.files;
 
-import static com.google.common.io.Files.touch;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.assertj.core.error.ShouldBeFile.shouldBeFile;
 import static org.assertj.core.error.ShouldHaveNoExtension.shouldHaveNoExtension;
@@ -24,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.assertj.core.internal.FilesBaseTest;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
