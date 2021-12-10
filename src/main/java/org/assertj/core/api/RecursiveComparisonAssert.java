@@ -32,6 +32,10 @@ import org.assertj.core.internal.TypeComparators;
 import org.assertj.core.util.CheckReturnValue;
 import org.assertj.core.util.introspection.IntrospectionError;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+
 public class RecursiveComparisonAssert<SELF extends RecursiveComparisonAssert<SELF>> extends AbstractAssert<SELF, Object> {
 
   private RecursiveComparisonConfiguration recursiveComparisonConfiguration;
@@ -466,6 +470,52 @@ public class RecursiveComparisonAssert<SELF extends RecursiveComparisonAssert<SE
   public SELF ignoringFields(String... fieldNamesToIgnore) {
     recursiveComparisonConfiguration.ignoreFields(fieldNamesToIgnore);
     return myself;
+  }
+
+  /**
+   * Makes the recursive comparison to ignore the object under test fields whose anotation name matches the given annotation.
+   * <p>
+   * Example:
+   * <pre><code class='java'>
+   *
+   * @Retention(RetentionPolicy.RUNTIME)
+   * @Target(ElementType.FIELD)
+   * public @interface TimeField {
+   *     public boolean included() default true;
+   * }
+   *
+   * class User {
+   *     @TimeField String created;
+   *     String name;
+   *     String surname;
+   * }
+   *
+   * User a=new User();
+   * User b=new User();
+   * a.name = "jack";
+   * a.created = "1829";
+   * b.name = "jack";
+   * b.created = "7777";
+   *
+   * // assertion succeeds as created fields are annotated with @TimeField and all other fields are equal
+   * assertThat(a).usingRecursiveComparison().ignoringFieldsOfAnnotation(TimeField.class).isEqualTo(b);
+   *
+   */
+
+  public SELF ignoringFieldsOfAnnotation(Class annotationClass) {
+    List<String> fieldNames = new ArrayList<>();
+    Field[] fields = this.actual.getClass().getDeclaredFields();
+    for(Field field : fields) {
+      Annotation annotation = field.getAnnotation(annotationClass);
+      if (annotation != null) {
+        fieldNames.add(field.getName());
+      }
+    }
+    String[] fieldStrings = new String[fieldNames.size()];
+    for (int i = 0; i < fieldNames.size(); i++) {
+      fieldStrings[i] = fieldNames.get(i);
+    }
+    return ignoringFields(fieldStrings);
   }
 
   /**
